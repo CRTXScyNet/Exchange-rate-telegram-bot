@@ -2,7 +2,6 @@ import json
 import os.path
 
 from requests import request, get
-from win32ctypes.pywin32.pywintypes import datetime
 
 filepath = 'data.json'
 
@@ -10,7 +9,8 @@ filepath = 'data.json'
 def write(my_dict: dict):
     """Write dictionary as json to file"""
     with open(filepath, 'w') as f:
-        json.dump(my_dict,f)
+        json.dump(my_dict, f)
+
 
 def read() -> dict:
     """Read data from the file"""
@@ -20,6 +20,7 @@ def read() -> dict:
         data = json.load(f)
 
     return data
+
 
 def download_rates() -> dict:
     """Download rates from remote API"""
@@ -33,13 +34,15 @@ def download_rates() -> dict:
 
     return my_dict
 
-def convert_to_string(my_dict:dict) -> str:
+
+def convert_to_string(my_dict: dict) -> str:
+    """Convert dict to a human friendly string"""
     message = ''
     for k, v in my_dict.items():
         message += f"{k}: {v}\n"
 
-
     return message.strip()
+
 
 def get_rate() -> str:
     my_dict = {}
@@ -47,7 +50,7 @@ def get_rate() -> str:
     response = download_rates()
     if not os.path.exists(filepath):
         write(response)
-        changed_dict =  response.copy()
+        changed_dict = response.copy()
     else:
         my_dict = read()
         for local in my_dict:
@@ -57,8 +60,6 @@ def get_rate() -> str:
                         changed_dict[remote] = response[remote]
                     continue
 
-
     if my_dict != response:
         write(response)
         return convert_to_string(changed_dict)
-

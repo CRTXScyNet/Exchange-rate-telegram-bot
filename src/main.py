@@ -7,7 +7,6 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from src.functions import get_rate
 
 
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     first = True
     while True:
