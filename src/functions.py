@@ -22,6 +22,8 @@ def download_rates() -> dict:
     for rate in response.json()['Valute']:
         my_dict[rate] = response.json()['Valute'][rate]['Value']
 
+    return my_dict
+
 def get_rate():
     my_dict = {}
     changed_dict = {}
