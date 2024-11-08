@@ -12,6 +12,15 @@ def write(my_dict: dict):
     with open(filepath, 'w') as f:
         json.dump(my_dict,f)
 
+def read() -> dict:
+    """Read data from the file"""
+    data = {}
+
+    with open(filepath) as f:
+        data = json.load(f)
+
+    return data
+
 def download_rates() -> dict:
     """Download rates from remote API"""
     url = "https://www.cbr-xml-daily.ru/daily_json.js"
@@ -31,7 +40,8 @@ def get_rate():
         my_dict = download_rates()
         write(my_dict)
         changed_dict =  my_dict.copy()
-
+    else:
+        my
     print(changed_dict)
 
 get_rate()
