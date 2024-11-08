@@ -33,15 +33,32 @@ def download_rates() -> dict:
 
     return my_dict
 
-def get_rate():
+def convert_to_string(my_dict:dict) -> str:
+    message = ''
+    for k, v in my_dict.items():
+        message += f"{k}: {v}\n"
+
+
+    return message.strip()
+
+def get_rate() -> str:
     my_dict = {}
     changed_dict = {}
+    response = download_rates()
     if not os.path.exists(filepath):
-        my_dict = download_rates()
-        write(my_dict)
-        changed_dict =  my_dict.copy()
+        write(response)
+        changed_dict =  response.copy()
     else:
-        my
-    print(changed_dict)
+        my_dict = read()
+        for local in my_dict:
+            for remote in response:
+                if local == remote:
+                    if my_dict[local] != response[remote]:
+                        changed_dict[remote] = response[remote]
+                    continue
 
-get_rate()
+
+    if my_dict != response:
+        write(response)
+        return convert_to_string(changed_dict)
+
