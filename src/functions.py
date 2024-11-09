@@ -54,12 +54,19 @@ def get_rate() -> str:
     else:
         my_dict = read()
         for local in my_dict:
-            for remote in response:
-                if local == remote:
-                    if my_dict[local] != response[remote]:
-                        changed_dict[remote] = response[remote]
-                    continue
+            remote = response[local]
+            if my_dict[local] != remote:
+                changed_dict[local] = remote
+            # for remote in response:
+            #     if local == remote:
+            #         if my_dict[local] != response[remote]:
+            #             changed_dict[remote] = response[remote]
+            #         continue
+    print(f'Length of downloaded dict: {len(response)}')
+    print(f'Length of dict of changes: {len(changed_dict)}')
 
     if my_dict != response:
         write(response)
         return convert_to_string(changed_dict)
+    else:
+        return ''
