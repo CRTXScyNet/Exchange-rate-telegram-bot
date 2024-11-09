@@ -1,7 +1,9 @@
 import json
 import os.path
+from datetime import time
 
 from requests import request, get
+from win32ctypes.pywin32.pywintypes import datetime
 
 filepath = 'data.json'
 
@@ -64,6 +66,9 @@ def get_rate() -> str:
             #         continue
     print(f'Length of downloaded dict: {len(response)}')
     print(f'Length of dict of changes: {len(changed_dict)}')
+    custom_format = '%H:%M'
+    cur_time = datetime.now().time()
+    print(f'Time: {cur_time.strftime(custom_format)}')
 
     if my_dict != response:
         write(response)
