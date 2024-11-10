@@ -1,6 +1,7 @@
 import json
 import os.path
 from idlelib.configdialog import changes
+from statistics import correlation
 
 from PIL.ImImagePlugin import split
 from requests import request, get
@@ -48,14 +49,23 @@ def convert_to_string(my_dict: dict) -> str:
     return message.strip()
 
 
-def check_changes(local_dict:dict, remote_dict:dict) -> dict:
+def check_changes(local_dict:dict = None, remote_dict:dict = None) -> dict:
     """Check changes between local and remote datas"""
     changed_dict = {}
+    is_write = False
+    if local_dict is None:
+        local_dict = read()
+    if remote_dict is None:
+        remote_dict = download_rates()
+        is_write = True
 
     for local in local_dict:
         remote = remote_dict[local]
         if local_dict[local] != remote:
             changed_dict[local] = remote
+
+    if is_write:
+        write(remote_dict)
 
     return changed_dict
 
@@ -102,8 +112,23 @@ def get_custom_currency(rates:str='') -> str:
         for rate in message:
             if rate in changed_dict:
                 del changed_dict[rate]
-
+        if len(message) == 0:
+            message = 'No currency found.'
         changed_dict = f"Also changed:\n{convert_to_string(changed_dict)}"
         message = message + '\n\n'+ changed_dict
 
     return message
+
+def get_all_currencies() -> str:
+    changed_dict = check_changes()
+    local_dict = read()
+
+    if len(changed_dict) != 0:
+        if len(changed_dict) != 0:
+            for rate in  changed_dict:
+                if rate in local_dict:
+                    del local_dict[rate]
+        changed_dict = f'\n\nChanged:\n{convert_to_string(changed_dict)}'
+    result = convert_to_string(local_dict)
+    result = f'{result}{changed_dict if len(changed_dict) != 0 else ""}'
+    return result
