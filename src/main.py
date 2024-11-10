@@ -4,7 +4,7 @@ import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
-from src.functions import get_rate, get_custom_currency
+from src.functions import get_rate, get_custom_currency, get_all_currencies
 
 users = {}
 CHECK_DELAY = 900
@@ -31,6 +31,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         users[user_id] = False
 
 
+async def get_all(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = get_all_currencies()
+    user_id = update.message.from_user.id
+    await context.bot.send_message(chat_id=user_id, text=message)
+
+
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = get_custom_currency(update.message.text)
     user_id = update.message.from_user.id
@@ -45,9 +51,10 @@ app = ApplicationBuilder().token(os.getenv('EXCHANGE_RATE_TELEGRAM_BOT')).build(
 
 currency_rate_notification = CommandHandler("start", start)
 echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND),echo)
-
+get_all_currencies_handler = CommandHandler('all', get_all)
 app.add_handler(currency_rate_notification)
 app.add_handler(echo_handler)
+app.add_handler(get_all_currencies_handler)
 
 
 app.run_polling()
