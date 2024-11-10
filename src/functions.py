@@ -1,7 +1,11 @@
 import json
 import os.path
+from idlelib.configdialog import changes
 
+from PIL.ImImagePlugin import split
 from requests import request, get
+from win32ctypes.pywin32.pywintypes import datetime
+
 
 filepath = 'data.json'
 
@@ -44,22 +48,62 @@ def convert_to_string(my_dict: dict) -> str:
     return message.strip()
 
 
-def get_rate() -> str:
-    my_dict = {}
+def check_changes(local_dict:dict, remote_dict:dict) -> dict:
+    """Check changes between local and remote datas"""
     changed_dict = {}
-    response = download_rates()
-    if not os.path.exists(filepath):
-        write(response)
-        changed_dict = response.copy()
-    else:
-        my_dict = read()
-        for local in my_dict:
-            for remote in response:
-                if local == remote:
-                    if my_dict[local] != response[remote]:
-                        changed_dict[remote] = response[remote]
-                    continue
 
-    if my_dict != response:
-        write(response)
+    for local in local_dict:
+        remote = remote_dict[local]
+        if local_dict[local] != remote:
+            changed_dict[local] = remote
+
+    return changed_dict
+
+
+def get_rate() -> str:
+    local_dict = {}
+    changed_dict = {}
+    remote_dict = download_rates()
+    if not os.path.exists(filepath):
+        write(remote_dict)
+        changed_dict = remote_dict.copy()
+    else:
+        local_dict = read()
+        check_changes(local_dict,remote_dict)
+
+    print(f'Length of downloaded dict: {len(remote_dict)}')
+    print(f'Length of dict of changes: {len(changed_dict)}')
+    custom_format = '%H:%M'
+    cur_time = datetime.now().time()
+    print(f'Time: {cur_time.strftime(custom_format)}')
+
+    if local_dict != remote_dict:
+        write(remote_dict)
         return convert_to_string(changed_dict)
+    else:
+        return ''
+
+def get_custom_currency(rates:str='') -> str:
+    rates = rates.replace(" ", "").strip().upper().split(",")
+
+    remote_dict = download_rates()
+    local_dict = read()
+    changed_dict = check_changes(local_dict, remote_dict)
+    if len(changed_dict) != 0:
+        write(remote_dict)
+    message = {}
+    for rate in rates:
+        if rate in remote_dict:
+            message[rate] = remote_dict[rate]
+
+    message = convert_to_string(message)
+
+    if len(changed_dict) != 0:
+        for rate in message:
+            if rate in changed_dict:
+                del changed_dict[rate]
+
+        changed_dict = f"Also changed:\n{convert_to_string(changed_dict)}"
+        message = message + '\n\n'+ changed_dict
+
+    return message
