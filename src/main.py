@@ -16,7 +16,7 @@ async def check_rate_updates(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await context.bot.send_message(chat_id=user_id, text=message)
             # await update.message.reply_text(message)
         elif user_id in users and users[user_id] == False:
-            await context.bot.send_message(chat_id=user_id, text='Changes not found')
+            await context.bot.send_message(chat_id=user_id, text='No changes found')
             users[user_id] = True
             # await update.message.reply_text('Changes not found')
 
@@ -38,7 +38,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if len(message) != 0:
         await context.bot.send_message(chat_id=user_id, text=message)
     else:
-        await context.bot.send_message(chat_id=user_id, text="No matching.\nCheck that you write currency correct")
+        await context.bot.send_message(chat_id=user_id, text="No matching.\nCheck that you wrote currency code correctly")
 
 
 app = ApplicationBuilder().token(os.getenv('EXCHANGE_RATE_TELEGRAM_BOT')).build()
