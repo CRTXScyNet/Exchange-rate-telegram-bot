@@ -7,7 +7,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Messa
 from src.functions import get_rate, get_custom_currency
 
 users = {}
-RESPONSE_TIMEOUT = 900
+CHECK_DELAY = 900
 async def check_rate_updates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     while True:
@@ -21,7 +21,7 @@ async def check_rate_updates(update: Update, context: ContextTypes.DEFAULT_TYPE)
             # await update.message.reply_text('Changes not found')
 
         print(f'Message length: {len(message)}\n')
-        await asyncio.sleep(5)
+        await asyncio.sleep(CHECK_DELAY)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
