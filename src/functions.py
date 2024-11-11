@@ -79,15 +79,15 @@ def get_rate() -> str:
         changed_dict = remote_dict.copy()
     else:
         local_dict = read()
-        check_changes(local_dict,remote_dict)
+        changed_dict =  check_changes(local_dict,remote_dict)
 
     print(f'Length of downloaded dict: {len(remote_dict)}')
-    print(f'Length of dict of changes: {len(changed_dict)}')
+    print(f'Length of changes: {len(changed_dict)}')
     custom_format = '%H:%M'
     cur_time = datetime.now().time()
     print(f'Time: {cur_time.strftime(custom_format)}')
 
-    if local_dict != remote_dict:
+    if len(changed_dict) != 0:
         write(remote_dict)
         return convert_to_string(changed_dict)
     else:
