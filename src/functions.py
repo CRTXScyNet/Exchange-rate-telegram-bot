@@ -49,86 +49,81 @@ def convert_to_string(my_dict: dict) -> str:
     return message.strip()
 
 
-def check_changes(local_dict:dict = None, remote_dict:dict = None) -> dict:
+def check_changes() -> dict:
     """Check changes between local and remote datas"""
     changed_dict = {}
-    is_write = False
-    if local_dict is None:
+    local_dict = {}
+
+    if os.path.exists(filepath):
         local_dict = read()
-    if remote_dict is None:
-        remote_dict = download_rates()
-        is_write = True
+
+    remote_dict = download_rates()
 
     for local in local_dict:
         remote = remote_dict[local]
         if local_dict[local] != remote:
             changed_dict[local] = remote
 
-    if is_write:
-        write(remote_dict)
+    write(remote_dict)
 
     return changed_dict
 
 
 def get_rate() -> str:
-    local_dict = {}
-    changed_dict = {}
-    remote_dict = download_rates()
-    if not os.path.exists(filepath):
-        write(remote_dict)
-        changed_dict = remote_dict.copy()
-    else:
-        local_dict = read()
-        changed_dict =  check_changes(local_dict,remote_dict)
+    """Return changed currency or empty string if changed not found"""
+    changed_dict = check_changes()
 
-    print(f'Length of downloaded dict: {len(remote_dict)}')
     print(f'Length of changes: {len(changed_dict)}')
+
     custom_format = '%H:%M'
     cur_time = datetime.now().time()
     print(f'Time: {cur_time.strftime(custom_format)}')
 
-    if len(changed_dict) != 0:
-        write(remote_dict)
-        return convert_to_string(changed_dict)
-    else:
-        return ''
+    return convert_to_string(changed_dict)
 
 def get_custom_currency(rates:str='') -> str:
-    rates = rates.replace(" ", "").strip().upper().split(",")
 
-    remote_dict = download_rates()
+    """Returns custom currency wrote in str argument,"""
+    rates = rates.strip().upper().splitlines()
+    if not os.path.exists(filepath):
+        check_changes()
+
+    for i in range(len(rates)):
+        rates[i] = rates[i].strip()
+        rates.extend(rates[i].split(','))
+        rates[i] = ''
+
+    for i in range(len(rates)):
+        s1 = rates[i].strip()
+        if ' ' in s1:
+            s1 = s1.split()
+            for i2 in range(len(s1)):
+                s2 = s1[i2].strip()
+                s1[i2] = s2
+                rates.insert(len(rates),s2)
+            rates[i] = ''
+        else:
+            rates[i] = s1
+
+
+
+
     local_dict = read()
-    changed_dict = check_changes(local_dict, remote_dict)
-    if len(changed_dict) != 0:
-        write(remote_dict)
+    rates = [i for i in rates if i != '']
     message = {}
     for rate in rates:
-        if rate in remote_dict:
-            message[rate] = remote_dict[rate]
+        if rate in local_dict:
+            message[rate] = local_dict[rate]
 
     message = convert_to_string(message)
-
-    if len(changed_dict) != 0:
-        for rate in message:
-            if rate in changed_dict:
-                del changed_dict[rate]
-        if len(message) == 0:
-            message = 'No currency found.'
-        changed_dict = f"Also changed:\n{convert_to_string(changed_dict)}"
-        message = message + '\n\n'+ changed_dict
 
     return message
 
 def get_all_currencies() -> str:
-    changed_dict = check_changes()
-    local_dict = read()
+    """Returns all available currencies"""
+    if not os.path.exists(filepath):
+        check_changes()
 
-    if len(changed_dict) != 0:
-        if len(changed_dict) != 0:
-            for rate in  changed_dict:
-                if rate in local_dict:
-                    del local_dict[rate]
-        changed_dict = f'\n\nChanged:\n{convert_to_string(changed_dict)}'
-    result = convert_to_string(local_dict)
-    result = f'{result}{changed_dict if len(changed_dict) != 0 else ""}'
+    result = convert_to_string(read())
+
     return result
